@@ -1,5 +1,5 @@
 ---
-title: "Modèles linéaires mixtes et modèles linéaires généralisés mixtes"
+title: "Introduction aux modèles mixtes (LMM et GLMM)"
 author: "Jean-Pierre Vacher"
 date: 'last updated: `r Sys.Date()`'
 output:
@@ -33,6 +33,31 @@ slides > slide {
 - Évaluer un modèle mixte
 - Cas particulier : modèle d'occupation
 - Recommandations pour les modèles mixtes et conclusion
+
+# Introduction
+
+- Quand on envisage une stratégie d'échantillonnage en écologie, le plus souvent on utilise des blocs de mesures : sites de mesures (placette, transect…), mesures répétées (plusieurs années de mesures ou plusieurs mesures par individu), régions naturelles ou biogéographiques.
+
+- Ces structures par blocs nuisent à l’estimation des paramètres de modèles linéaires et doivent donc être prises en compte
+
+- De plus, pour diverses raisons inhérentes aux contraintes du travail de terrain, les relevés de terrain sont souvent hétérogènes, ce qui résulte dans des désiquilibres entre blocs. Ceci peut être un obstacle à l’inférence (certains points captent la variance).
+
+Par conséquent, dans une démarche analytique qui intègre une structure croisée ou emboîtée (e.g. spatio-temporel), il est utile :
+
+- D'intégrer une structure hiérarchique au sein d'un modèle afin de permettre une inférence populationnelle.
+
+- Évaluer si les données que l'on a récolté sont compatibles avec cette approche : bien réfléchir à la stratégie d'échantillonnage et au protocole de relevés en amont !
+
+### Recommandation générale (rappel)
+
+N'oubliez pas en amont de toute analyse de bien identifier les trois éléments suivants (vaut pour toute approche statistique) :
+
+- Définir la population statistique.
+
+- Définir l'échantillon.
+
+- Définir l'unité d'échantillonnage.
+
 
 # Rappels LM et GLM
 
@@ -187,10 +212,11 @@ ic.sim.s1
 ```
 
 <font size=5>
-L'IC est de nouveau un peu étroit. De plus, difficulté d'interprétation car l'intercept correspond à la valeur de la réponse dans le bloc de référence quand le prédicteur est 0.
+L'IC est de nouveau un peu étroit. De plus, difficulté d'interprétation car l'intercept correspond à la valeur de la réponse dans la strate de référence quand le prédicteur est 0. On perd une quantité estimée qui nous intéresse : la valeur de la réponse à la valeur moyenne du prédicteur dans l’ensemble de la populations, c'est-à-dire l'ensemble des strates.
+
 
 Regardons comment le jeu de données est construit : 
-on a simule des valeurs populationnelles pour mean et alpha, donc il faut que l'inference se situe aussi a l'echelle populationnelle.
+on a simulé des valeurs populationnelles pour _mean_ et $\alpha$, donc il faut que l'inference se situe aussi à l'echelle populationnelle.
 </font>
 
 Comment intégrer l'effet strate dans le modèle ?
@@ -238,9 +264,6 @@ Dispersion homogène des résidus autour de 0, il n'y a pas de patron des résid
 - Solution 1 : stratifier. Seulement, avec ajout d'un effet strate simple, difficulté d'interpréter l'intercept car c'est le bloc “0” qui est pris en référence. Perte de l'estimateur d'intérêt : on n'estime pas une moyenne sur l'ensemble de la population.
 
 - Solution 2 = stratitifier en prenant en compte un effet aléatoire. C'est-à-dire que l'on tient compte de l'emboîtement hiérarchique (les strates) dans le modèle.
-
-## Qu'est-ce qui caractérise un modèle mixte ?
- 
 
 - Enjeux : repérer la hiérarchie de la stratification = où sont les “boîtes” et comment sont-elles arrangées ?  Puis, les représenter dans le modèle.
 
@@ -344,9 +367,10 @@ Dans l'expression “1|ID_cell”, le 1 indique que la structure hiérarchique s
 
 *Note : il existe d'autres packages pour ajuster des lmm ou des glmm (e.g., nlme, glmm), à vous de choisir celui qui vous semble le plus appoprié. Actuellement, le plus courant reste lme4.
 
+
 # Interpréter les résultats d'un modèle mixte
 
-## Exemple de modèle
+## Exemple de modèle avec des données simulées
 
 - On veut connaître la variation temporelle de la richesse spécifique d'amphibiens dans un réseau de mares.
 - Les mares sont réparties dans six régions naturelles.
@@ -463,17 +487,48 @@ C'est important de regarder ce bloc car une forte corrélation peut signer un d�
 
 
 # Évaluation du modèle
-##
+
+## Ajustement
+
+```{r, echo=T, eval=T, warning=F}
+library(MuMIn)
+r.squaredGLMM(mod1)
+```
+
+- bloc “R2m” = variance expliquée par les **effets fixes** (m pour _marginal_)
+
+- bloc “R2c” = variance expliquée par les **effets fixes + effets aléatoires** (c pour _conditionnal_)
+
+Il s’agit de la variance sur l’échelle du prédicteur linéaire, autrement dit, la variance de la réponse transformée par la fonction de lien.
+
+Le résultat de la fonction _r.squaredGLMM_ donnent plusieurs valeurs estimées qui sont assez semblables. Selon les auteurs, la méthode trigamma est la plus précise, mais elle n’est disponible que pour un GLMM avec lien log (e.g. distribution de Poisson).
+
+### Pour comparaison, même modèle en GLM :
+
+```{r, echo=F, eval=T}
+mod1.glm <- glm(RS ~ Annee, family = poisson, 
+      data = amph_mares)
+summary(mod1.glm)
+```
+
+Déviance expliquée par l'année avec le GLM = 
+
+```{r, echo=T, eval=T}
+(100*(summary(mod1.glm)$null.deviance - summary(mod1.glm)$deviance)) / summary(mod1.glm)$null.deviance
+```
+
+## Surdispersion
+
 Surdispersion : déviance des résidus sur nombre de degrés de liberté. Si le chi2 est significatif, on estime qu'il y a de la surdispersion.
 
 On repère la déviance et le nombre de degrés de liberté dans le résumé du modèle :
 
 Puis on évalue la surdispersion :
 
-```{r, echo=T, eval=F}
+```{r, echo=T, eval=T}
 chi2 <- sum(residuals(mod1, type = "pearson")^2)
 pchisq(chi2, df = df.residual(mod1))
-#1
+
 ```
 
 On conclut qu'il n'y a pas de surdispersion, c'est-à-dire la variance des réponses observées est similaire à la variance théorique, ce qui signifie que l'erreur standard des paramètres est bien estimée.
@@ -680,21 +735,42 @@ Un modèle d'occupation est un cas particulier de modèle mixte qui se caractér
 - Classe binomiale : occupé/non occupé (0/1)
 - Répétition temporelle et spatiale : _Robust design_, qui contient des sessions primaires (en général années) et des sessions secondaires (session de comptage au sein d'une année).
 
+Modèle null :
 \[ \psi(.)p(.) \]
 
+Modèle avec covariables :
+\[ \psi(Foret, Prairies)p(Temperature, Pluie) \]
 
 ## Modèle d'occupation dynamique
 
 Si on opère un protocole d'occupation de sites sur plusieurs années, ont peut estimer en plus la colonisation ($\gamma$) et l'extinction ($\varepsilon$) :
 
+Modèle null :
 \[ \psi(.)\gamma(.)\varepsilon(.)p(.) \]
+
+Modèle avec covariables :
+\[ \psi(Foret, Prairies)\gamma(Foret, Rivieres)\varepsilon(Foret, Rivieres)p(Temperature, Pluie) \]
+
+<font size=4>
+Note : les covariables sont données à titre d'exemple, en général les covariables d'occupation ne sont pas les mêmes que les covariables de détection. Pour la colonisation et l'extinction, c'est la même nature de covariables que pour l'occupation, mais pas obligatoirement les mêmes covariables, cela dépend de vos hypothèses sur ce qui influence l'un ou l'autre de ces paramètres.
+</font>
+
 
 Ce type de modèles se développe ces dernières années en écologie, pratique pour des protocoles de suivi standardisés.
 
+Attention cependant :
+
+- Nécessite une réflexion en amont sur la stratégie d'échantillonnage et le protocole
+
+- Souvent le choix de la stratégie d'échantillonnage repose sur un compromis entre puissance statistique et moyens alloués
+
+- Possibilité de faire des simulations en amont (scénarios) pour estimer le meilleur plan d'échantillonnage (compromis robustesse statistique/moyens alloués)
+
 - En général à large échelle avec beaucoup de réplicats (> 200)
+
 - Possibilité de réduire l'échantillon, mais augmenter le nombre de sessions secondaires.
 
-## Pour en savoir plus
+## Pour en savoir plus sur les modèles d'occupation
 
 MacKenzie et al. (2018). Occupancy Estimation and Modeling: Inferring Patterns and Dynamics of Species Occurrence: Second Edition. Academic Press, Elsevier, 1-641.
 
