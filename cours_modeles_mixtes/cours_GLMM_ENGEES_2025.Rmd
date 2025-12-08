@@ -32,9 +32,9 @@ slides > slide {
 - Interpréter un modèle mixte
 - Évaluer un modèle mixte
 - Cas particulier : modèle d'occupation
-- (Bonus) Générer un plan d'échantillonnage
+- Recommandations pour les modèles mixtes et conclusion
 
-# 1. Rappels LM et GLM
+# Rappels LM et GLM
 
 On simule un jeu de données selon le scénario suivant : 
 
@@ -195,7 +195,7 @@ on a simule des valeurs populationnelles pour mean et alpha, donc il faut que l'
 
 Comment intégrer l'effet strate dans le modèle ?
 
-# 2. Modèle mixte
+# Modèle mixte
 
 ## On construit un modèle mixte avec un terme aléatoire
 
@@ -421,7 +421,7 @@ On voit qu'il semble y avoir un effet de l'année mais que cela varie selon les 
 
 ## Ecriture du modèle
 <div class="col2">
-<font size=4>
+<font size=5>
 - Partie stockastique du modèle (loi de Poisson car dénombrement) :
 \[RS \sim Poisson(\lambda_{i})  \]
 - Partie déterministe du modèle :
@@ -495,7 +495,7 @@ On prédit des peuplements plus riches dans des forêts hautes (proxi de la viei
 On pense qu'il y a des variations entre massifs. Par conséquent, on va construire un modèle mixte qui testera :
 
 - Variable réponse = richesse spécifique, mesurée à partir de points d'écoutes aléatoires au sein des massifs
-- Variables explicatives (effets fixes) = hauteur, surface terrierre, essence dominante
+- Variables explicatives (effets fixes) = hauteur, surface terrière, essence dominante
 - Variable aléatoire = massif
 
 ## On regarde à quoi ressemblent les données :
