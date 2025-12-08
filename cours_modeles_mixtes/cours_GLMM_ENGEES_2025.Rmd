@@ -681,9 +681,17 @@ boxplot(residuals(mod.perche3) ~ dperche1$massif)
 
 On voit que les résidus sont dispersés de façon homogène autour de 0, pas de patron en fonction du massif.
 
-## Mais on pense qu'il y a un effet des massifs
+### Mais on pense qu'il y a un effet des massifs
 
-On fait l’hypothèse que les interactions reflètent des **variations aléatoires d’un même processus**, et non des processus distincts
+Dans notre modèle, l’effet aléatoire s’additionne à l’intercept : la structure hiérarchique de l’échantillonnage n’impacte que les différences de richesses inter-massifs
+
+On a cependant des raisons de penser que les effets fixes sont légèrement différents d’un massif à l’autre, car la composition des peuplements est différente, il peut y avoir des interférence avec des effets paysagers, les espèces d’oiseaux partiellement différentes, …
+
+Dans ce cas, on pourrait opter pour un GLM avec interactions (voir script). Certaines interactions ne sont pas estimables (NA dans le summary du modèle), car il y a un déséquilibre dans le plan d'échantillonnage). On voit qu'il y a des effets par massifs, mais ils ne nous intéressent pas en tant que tels, on veut juste les prendre en compte.
+
+### Passons au modèle mixte pour prendre en compte les interactions :
+
+Dans un modèle mixte, on fait l’hypothèse que les interactions reflètent des **variations aléatoires d’un même processus**, et non des processus distincts
 
 - On s’intéresse aux effets communs à tous les massifs
 - Dans les massifs déficitaires en données, on peut estimer la variation intra-massif à partir des autres massifs = **propagation des erreurs**
