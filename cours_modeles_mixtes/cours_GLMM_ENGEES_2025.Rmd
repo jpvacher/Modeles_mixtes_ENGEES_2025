@@ -555,13 +555,38 @@ On pense qu'il y a des variations entre massifs. Par conséquent, on va construi
 
 ## On regarde à quoi ressemblent les données :
 
+
 ```{r, echo=F, eval=T}
 dperche1 <- read_tsv("richesse_avifaune_perche.txt") %>% 
   mutate(point = factor(point), massif = factor(massif), essence = factor(essence))
 print(dperche1, width = 60, n = 5)
 ```
 
-Pas de répétitions. Mais les données sont structurées, on peut considérer les massifs comme une strate.
+Pas de répétitions. Mais les données sont structurées, on peut considérer les massifs comme une strate. Explorons la richesse en fonction des massifs :
+
+
+```{r, echo=F, eval=T}
+ggplot(data = dperche1, aes(x = massif, y = rs)) +
+  geom_boxplot() +
+  ylab("Richesse oiseaux") +
+  ggtitle("Richesse ~ massif") +
+  theme_bw()
+
+```
+
+On a l'impression qu'il y a peu de différences de richesse entre massifs.
+
+Regardons ce que donnerait un glm :
+
+```{r, echo=F, eval=T}
+glm.oiseaux <- glm(rs~Hdom+ST+essence,data=dperche1,family=poisson)
+boxplot(residuals(glm.oiseaux, type = "pearson") ~ dperche1$massif, main = "residus ~ massif")
+summary(aov(residuals(glm.oiseaux, type="pearson") ~ dperche1$massif))
+summary(dperche1$massif)
+
+```
+
+On voit qu'il y a un effet du massif, mais le massif ne nous intéresse pas en tant que tel. De plus, on constate une forte hétérogénéité entre massifs.
 
 ## Pourquoi utiliser un modèle mixte dans ce cas ?
 
@@ -735,6 +760,10 @@ Un modèle d'occupation est un cas particulier de modèle mixte qui se caractér
 - Classe binomiale : occupé/non occupé (0/1)
 - Répétition temporelle et spatiale : _Robust design_, qui contient des sessions primaires (en général années) et des sessions secondaires (session de comptage au sein d'une année).
 
+Occupation : 
+
+\[ z_i \sim Bernoulli(\psi_i) \]
+
 Modèle null :
 \[ \psi(.)p(.) \]
 
@@ -755,6 +784,22 @@ Modèle avec covariables :
 Note : les covariables sont données à titre d'exemple, en général les covariables d'occupation ne sont pas les mêmes que les covariables de détection. Pour la colonisation et l'extinction, c'est la même nature de covariables que pour l'occupation, mais pas obligatoirement les mêmes covariables, cela dépend de vos hypothèses sur ce qui influence l'un ou l'autre de ces paramètres.
 </font>
 
+Exemple de modélisation de détection :
+
+
+\[ logit(p_{i,j} = \alpha_0 + \beta_1 \times date_{i,j}) + \beta_2 \times date^2_{i,j}  \]
+
+<font size = 4>
+
+- i = site
+
+- j = occasion de visite
+
+- $\alpha_0$ = intercept
+
+- $\beta_1$ et $\beta_2$ sont les effets linéaires et quadratiques de la date sur une viste *j* dans un site *i*
+
+</font>
 
 Ce type de modèles se développe ces dernières années en écologie, pratique pour des protocoles de suivi standardisés.
 
@@ -769,6 +814,10 @@ Attention cependant :
 - En général à large échelle avec beaucoup de réplicats (> 200)
 
 - Possibilité de réduire l'échantillon, mais augmenter le nombre de sessions secondaires.
+
+### Dans R, package *unmarked*. 
+
+Fonction *unmarkedFrameOccu* pour une année, *unmarkedMultFrame* multi-années. Attention à la mise en forme des données !
 
 ## Pour en savoir plus sur les modèles d'occupation
 
