@@ -107,7 +107,7 @@ segments(x0=seq(2,13,2),x1=seq(2,13,2),y0=conf.nomassif[,1],y1=conf.nomassif[,2]
 legend("topright",bty="n",lty="solid",col=c("black","darkred"),legend=c("effet aleatoire massif","pas d'effet massif"))
 
 #--------------------------------------#
-### Modele mixte e pentes aleatoires ###
+### Modele mixte à pentes aleatoires ###
 #--------------------------------------#
 
 ## GLM classique : terme d'interaction

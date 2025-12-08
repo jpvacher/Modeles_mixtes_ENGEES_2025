@@ -280,7 +280,7 @@ Dispersion homogène des résidus autour de 0, il n'y a pas de patron des résid
 - Partie stockastique du modèle :
 \[RS \sim Poisson(\lambda_{i})  \]
 - Partie déterministe du modèle :
-\[ log(\lambda_i) = \alpha + \beta \times Années_t + \varepsilon_{i}  \]
+\[ log(\lambda_i) = \alpha + \beta \times Années_i + \varepsilon_{i}  \]
 - Effet aléatoire :
 \[ \varepsilon_{i} \sim N(\mu_j, \sigma) \]
 
@@ -288,7 +288,6 @@ Dispersion homogène des résidus autour de 0, il n'y a pas de patron des résid
 
 
 <font size="4"> i = unité d'échantillon ;</font>
-<font size="4"> t = occasion d'échantillon (temps)</font>
 
 ##
 
@@ -608,11 +607,18 @@ Le degré de liberté est grand pour tous les massifs, donc tous les effets mass
 
 
 ### GLM
-\[ log(\lambda_i) = \alpha + \beta \times Hdom_i + \gamma ST_i + \sum_{k = 2}^{k}  delta_k \times essence_i + \sum_{j = 2}^{j}  \theta_j \times massif_i \]
+
+Ici, les massifs sont considérés comme un effet fixe (variable catégorielle)
+
+\[ log(\lambda_i) = \alpha + \beta \times Hdom_i + \gamma ST_i + \sum_{k = 2}^{k}  \delta_k \times essence_i + \sum_{j = 2}^{j}  \theta_j \times massif_i \]
 
 Les $\theta$ sont estimés indépendamment.
 
 ### GLMM
+
+Ici, les massifs sont considérés comme un terme aléatoire
+
+
 \[ log(\lambda_i) = \alpha + \beta \times Hdom_i + \gamma ST_i + \sum_{k = 2}^{k}  \delta_k \times essence_i + \theta_i  \]
 - Effet aléatoire “massif forestier” :
 \[ \theta_i \sim N(\mu_j, \sigma) \]
@@ -646,7 +652,7 @@ summary(mod.perche3)
 
 - Bloc “Random effects” : la variance inter-blocs est quasi nulle, c'est-à-dire qu'en moyenne les résidus ne varient pas entre les massifs (pas de différence résiduelle d’un massif à l’autre).
 
-- Bloc “Fixed effects” : les p-values ne sont pas à prendre en compte dans un glmm à l'inverse d'un glm. On peut tout de même s'y fier dans le cas de modèles simples avec un fort ddl comme ici, mais à abandonner dès que les modèles se complexifient. On regardera directement l'effet de l'estimate. N'oubliez pas qu'il y a une fonction de lien, donc les estimates doivent être transformés pour avoir les vraies valeurs. Ici, on utilisera une exponentielle.
+- Bloc “Fixed effects” : les p-values ne sont pas à prendre en compte dans un glmm à l'inverse d'un glm. On peut tout de même s'y fier dans le cas de modèles simples avec un fort degré de liberté comme ici, mais à abandonner dès que les modèles se complexifient. On regardera directement l'effet de l'estimate. N'oubliez pas qu'il y a une fonction de lien, donc les estimates doivent être transformés pour avoir les vraies valeurs. Ici, on utilisera une exponentielle.
 
 ```{r, echo=F, eval=T}
 fixef(mod.perche3)
@@ -656,7 +662,7 @@ sHdom.coef <- fixef(mod.perche3)[2]
 exp(sHdom.coef + intercept)
 ```
 
-Cela signifie que la richesse est à 2.72 quand sHdom est à 0, et augmente de 13.37 quand sHdom passe à 1.
+Cela signifie que la richesse est à 13.37 quand sHdom est à 0, et augmente de 1.89 quand sHdom passe à 1.
 
 ## Représentation graphique des estimates
 
@@ -683,7 +689,7 @@ On voit que les résidus sont dispersés de façon homogène autour de 0, pas de
 
 ### Mais on pense qu'il y a un effet des massifs
 
-Dans notre modèle, l’effet aléatoire s’additionne à l’intercept : la structure hiérarchique de l’échantillonnage n’impacte que les différences de richesses inter-massifs
+Dans notre modèle, l’effet aléatoire s’additionne à l’intercept : la structure hiérarchique de l’échantillonnage n’impacte que les différences de richesses inter-massifs.
 
 On a cependant des raisons de penser que les effets fixes sont légèrement différents d’un massif à l’autre, car la composition des peuplements est différente, il peut y avoir des interférence avec des effets paysagers, les espèces d’oiseaux partiellement différentes, …
 
@@ -691,23 +697,24 @@ Dans ce cas, on pourrait opter pour un GLM avec interactions (voir script). Cert
 
 ### Passons au modèle mixte pour prendre en compte les interactions :
 
-Dans un modèle mixte, on fait l’hypothèse que les interactions reflètent des **variations aléatoires d’un même processus**, et non des processus distincts
+Dans un modèle mixte, on fait l’hypothèse que les interactions reflètent des **variations aléatoires d’un même processus**, et non des processus distincts.
 
-- On s’intéresse aux effets communs à tous les massifs
-- Dans les massifs déficitaires en données, on peut estimer la variation intra-massif à partir des autres massifs = **propagation des erreurs**
+- On s’intéresse aux effets communs à tous les massifs.
+- Dans les massifs déficitaires en données, on peut estimer la variation intra-massif à partir des autres massifs = **propagation des erreurs**.
 
-Modèle à **pentes aléatoires** sur les effets fixes = une pente intra-massif, moyenne sur tous les massifs ($\alpha$, $\beta$, $\gamma$, $\delta$)+ une variation inter-massif ($\theta$, $\rho$, $\gamma$, $\omega$)
+Modèle à **pentes aléatoires sur les effets fixes** = une pente intra-massif, moyenne sur tous les massifs ($\alpha$, $\beta$, $\gamma$, $\delta$) + une variation inter-massif ($\theta$, $\rho$, $\gamma$, $\omega$).
 
-\[ log(\lambda_i) = \alpha + \beta \times Hdom_i + \gamma ST_i + \sum_{k = 2}^{k}  \delta_k \times essence_i + \theta_i  \]
+\[ log(\lambda_i) = \alpha_j + \beta_j \times Hdom_i + \gamma_j ST_i + \sum_{k = 2}^{k}  \delta_{k,j} \times essence_i + \theta_i  \]
 - Effet aléatoire “massif forestier” :
 \[ \theta_i \sim N(\mu_j, \sigma) \]
 
 \[ \mu_j \sim N(0, \sigma') \]
 
-– Variation inter-massif :
+- Variation inter-massif :
 \[ \beta_j \sim N(\beta, \psi) \]
-\[ \beta_j = \beta + \rho_j \]
-\[ \rho_j \sim N(0, \psi \]
+\[ \beta_j = \beta + \rho_j) \]
+\[ \rho_j \sim N(0, \psi) \]
+
 ...
 
 ## Graphiquement, cela donne :
