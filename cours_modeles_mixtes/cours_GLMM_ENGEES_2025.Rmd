@@ -36,17 +36,17 @@ slides > slide {
 
 # Introduction
 
-- Quand on envisage une stratégie d'échantillonnage en écologie, le plus souvent on utilise des blocs de mesures : sites de mesures (placette, transect…), mesures répétées (plusieurs années de mesures ou plusieurs mesures par individu), régions naturelles ou biogéographiques.
+- Quand on envisage une stratégie d'échantillonnage en écologie, le plus souvent on utilise des blocs de mesures (ou strates) : sites de mesures (placette, transect…), mesures répétées (plusieurs années de mesures ou plusieurs mesures par individu), régions naturelles ou biogéographiques.
 
-- Ces structures par blocs nuisent à l’estimation des paramètres de modèles linéaires et doivent donc être prises en compte
+- Ces structures par blocs nuisent à l’estimation des paramètres de modèles linéaires et doivent donc être prises en compte dans l'analyse.
 
-- De plus, pour diverses raisons inhérentes aux contraintes du travail de terrain, les relevés de terrain sont souvent hétérogènes, ce qui résulte dans des désiquilibres entre blocs. Ceci peut être un obstacle à l’inférence (certains points captent la variance).
+- De plus, pour diverses raisons inhérentes aux contraintes du travail de terrain, les relevés de terrain sont souvent hétérogènes, ce qui résulte dans des désiquilibres entre blocs. Ceci peut être un obstacle à l’inférence (i.e. certains points captent la variance).
 
 Par conséquent, dans une démarche analytique qui intègre une structure croisée ou emboîtée (e.g. spatio-temporel), il est utile :
 
 - D'intégrer une structure hiérarchique au sein d'un modèle afin de permettre une inférence populationnelle.
 
-- Évaluer si les données que l'on a récolté sont compatibles avec cette approche : bien réfléchir à la stratégie d'échantillonnage et au protocole de relevés en amont !
+- Évaluer si les données que l'on a récoltées sont compatibles avec cette approche : bien réfléchir à la stratégie d'échantillonnage et au protocole de relevés en amont ! Ces deux éléments découlent de la question scientifique posée.
 
 ### Recommandation générale (rappel)
 
@@ -63,8 +63,8 @@ N'oubliez pas en amont de toute analyse de bien identifier les trois éléments 
 
 On simule un jeu de données selon le scénario suivant : 
 
-- 20 strates
-- Une variable réponse de moyenne, distribution normale de moyenne 5 et sd de 10
+- 20 strates (ou blocs, c'est synonyme)
+- Une variable réponse, distribution normale de moyenne 5 et sd de 10
 - Une variable explicative “Predicteur”, distribution normale de moyenne 0 et sd de 1
 - 30 points de mesure par strate
 - un résidu non structuré, distribution normale de moyenne 0 et sd de 1
@@ -109,7 +109,7 @@ summary(data.sim)
 
 ##
 
-On écrit un modèle linéaire pour évaluer l'influence de la variable explicative X sur la variable réponse Y (modèle “naïf”)
+On écrit un modèle linéaire pour évaluer l'influence de la variable explicative X (Prédicteur) sur la variable Y (Réponse). C'est un modèle “naïf”.
 
 \[Y \sim N(\mu, \sigma^2)  \]
 
@@ -129,7 +129,9 @@ plot(mod.naif) #evaluation graphique du modele
 
 ##
 
-Résidus moyens par strate :
+Cela semble OK (rédisus répartis sans clusters, sans patron particulier, répartis selon une normale et pas d'effet levier).
+
+On regarde les résidus moyens par strate :
 
 ```{r , echo=F, eval=T, message=FALSE}
 par(mfrow = c(1,1))
@@ -212,7 +214,7 @@ ic.sim.s1
 ```
 
 <font size=5>
-L'IC est de nouveau un peu étroit. De plus, difficulté d'interprétation car l'intercept correspond à la valeur de la réponse dans la strate de référence quand le prédicteur est 0. On perd une quantité estimée qui nous intéresse : la valeur de la réponse à la valeur moyenne du prédicteur dans l’ensemble de la populations, c'est-à-dire l'ensemble des strates.
+L'IC est de nouveau un peu étroit. De plus, difficulté d'interprétation car l'intercept correspond à la valeur de la réponse dans la strate de référence quand le prédicteur est fixé à 0. On perd une quantité estimée qui nous intéresse : la valeur de la réponse à la valeur moyenne du prédicteur dans l’ensemble de la populations, c'est-à-dire l'ensemble des strates.
 
 
 Regardons comment le jeu de données est construit : 
@@ -229,7 +231,7 @@ Maintenant, on intègre la stratification directement dans le modèle comme effe
 
 \[ \mu_i = \alpha + \beta \times X + \varepsilon_i \]
 
-- Effet aléatoire :
+- Effet aléatoire (toujours qualitatif) :
 \[ \varepsilon_{i} \sim N(\upsilon_i, \sigma_i) \]
 
 \[ \upsilon_i \sim N(\alpha, \gamma) \]
@@ -277,6 +279,8 @@ Dispersion homogène des résidus autour de 0, il n'y a pas de patron des résid
 
 ### GLMM avec une strate
 
+Exemple théorique avec une variable de réponse qui correspond à une mesure de richesse spécifique, donc un dénombrement (pas de valeur négative, que des entiers positifs).
+
 - Partie stockastique du modèle :
 \[RS \sim Poisson(\lambda_{i})  \]
 - Partie déterministe du modèle :
@@ -296,17 +300,16 @@ Dispersion homogène des résidus autour de 0, il n'y a pas de patron des résid
 - Partie stockastique du modèle :
 \[RS \sim Poisson(\lambda_{i,t})  \]
 - Partie déterministe du modèle :
-\[ log(\lambda_i,t) = \alpha + \beta \times Années_t + \varepsilon_{i,t}  \]
+\[ log(\lambda_i,t) = \alpha + \beta \times Années_i + \varepsilon_{i,j}  \]
 - Effet aléatoire :
-\[ \varepsilon_{i,t} \sim N(\mu_i, \sigma_i) \]
+\[ \varepsilon_{i} \sim N(\mu_i, \sigma_i) \]
 
-\[ \mu_i \sim N(\theta_z, \gamma_z) \]
+\[ \mu_i \sim N(\theta_j, \gamma_j) \]
 
-\[ \theta_z \sim N(0, \upsilon) \]
+\[ \theta_j \sim N(0, \upsilon) \]
 
-<font size="4"> i = unité d'échantillon 1 ( = strate 1) ;</font>
-<font size="4"> z = unité d'échantillon 2 ( = strate 2) ;</font>
-<font size="4"> t = occasion d'échantillon (temps)</font>
+<font size="4"> i = unité d'échantillonnage ( = strate 1) ;</font>
+<font size="4"> j = strate intermédiaire ( = strate 2) ;</font>
 
 ##
 
@@ -318,6 +321,7 @@ knitr::include_graphics("exemple_emboitement.png")
 ```
 </center>
 
+Note : Les facteurs aléatoires sont toujours des **variables qualitative** (facteurs, ou catégories)
 
 ## Dans quel cas opter pour un modèle mixte ?
 
@@ -332,7 +336,7 @@ Mutualisation de l’information entre individus grâce à l'effet aléatoire. N
 
 ## Dans R
 
-Exemple de jeu de données, en colonnes (g) et en lignes (d) (même chose structuré différemment). On choisira la structure en lignes :
+Exemple de jeu de données, en colonnes (g) et en lignes (d) (même chose structuré différemment). On choisira la structure en lignes pour ajuster un modèle mixte :
 <div class="col2">
 
 ```{r, echo=F, eval=T}
@@ -361,7 +365,7 @@ glmer(RS ~ Year + (1|ID_cell), family = poisson, data = df)
 ```
 
 <font size=5>
-Dans l'expression “1|ID_cell”, le 1 indique que la structure hiérarchique s'applique sur l'ordonnée à l'origine du modèle. La barre verticale (“pipe”) indique le codage d'effets aléatoires hiérarchiques. Les variables catégorielles aléatoires, de la strate la plus proche de la population à la strate la plus proche de l'individu. 
+Dans l'expression “1|ID_cell”, le 1 indique que la structure hiérarchique s'applique sur l'ordonnée à l'origine du modèle. La barre verticale (“pipe”) indique le codage d'effets aléatoires hiérarchiques. Les variables catégorielles aléatoires sont appelées de la strate la plus proche de la population à la strate la plus proche de l'individu. 
 </font>
 
 *Note : il existe d'autres packages pour ajuster des lmm ou des glmm (e.g., nlme, glmm), à vous de choisir celui qui vous semble le plus appoprié. Actuellement, le plus courant reste lme4.
@@ -448,7 +452,7 @@ On voit qu'il semble y avoir un effet de l'année mais que cela varie selon les 
 - Partie stockastique du modèle (loi de Poisson car dénombrement) :
 \[RS \sim Poisson(\lambda_{i})  \]
 - Partie déterministe du modèle :
-\[ log(\lambda_i) = \alpha + \beta \times Années_i + \varepsilon_{i}  \]
+\[ log(\lambda_i) = \alpha + \beta \times Années_i + \varepsilon_{i,j}  \]
 \[ \varepsilon_{i} \sim N(\mu_j, \sigma) \]
 
 \[ \mu_j \sim N(0, \sigma') \]
@@ -479,7 +483,7 @@ glmer affiche la variance inter-blocs. Si la différence résiduelle (Std. dev.)
 
 
 ### Bloc “Fixed effects”
-Attention à l'interprétation des p-values, dans les modèles complexes, elles n'ont pas nécessairement de valeur. OK dans les modèles simples avec fort ddl.
+Attention à l'interprétation des p-values, dans les modèles complexes, elles n'ont pas nécessairement de valeur. OK dans les modèles simples avec fort degré de liberté.
 
 ### Bloc “Correlation of fixed effects”
 C'est important de regarder ce bloc car une forte corrélation peut signer un défaut d’identifiabilité lié à une colinéarité trop forte entre variables (normalement on écarte les variables corrélées a priori), ou un plan d’échantillonnage déséquilibré.
@@ -498,7 +502,7 @@ r.squaredGLMM(mod1)
 
 - bloc “R2c” = variance expliquée par les **effets fixes + effets aléatoires** (c pour _conditionnal_)
 
-Il s’agit de la variance sur l’échelle du prédicteur linéaire, autrement dit, la variance de la réponse transformée par la fonction de lien.
+Il s’agit de la variance sur l’échelle du prédicteur linéaire, autrement dit, la variance de la réponse transformée par la fonction de lien dans le cas de GLMM.
 
 Le résultat de la fonction _r.squaredGLMM_ donnent plusieurs valeurs estimées qui sont assez semblables. Selon les auteurs, la méthode trigamma est la plus précise, mais elle n’est disponible que pour un GLMM avec lien log (e.g. distribution de Poisson).
 
@@ -662,7 +666,7 @@ sHdom.coef <- fixef(mod.perche3)[2]
 exp(sHdom.coef + intercept)
 ```
 
-Cela signifie que la richesse est à 13.37 quand sHdom est à 0, et augmente de 1.89 quand sHdom passe à 1.
+Cela signifie que la richesse moyenne est à 13.37 quand sHdom est à 0, et 15.26 en moyenne quand sHdom passe à 1 dans l'échelle naturelle des valeurs de la variable de réponse car la fonction de lien est pour une distribution de Poisson est log.
 
 ## Représentation graphique des estimates
 
@@ -702,7 +706,7 @@ Dans un modèle mixte, on fait l’hypothèse que les interactions reflètent de
 - On s’intéresse aux effets communs à tous les massifs.
 - Dans les massifs déficitaires en données, on peut estimer la variation intra-massif à partir des autres massifs = **propagation des erreurs**.
 
-Modèle à **pentes aléatoires sur les effets fixes** = une pente intra-massif, moyenne sur tous les massifs ($\alpha$, $\beta$, $\gamma$, $\delta$) + une variation inter-massif ($\theta$, $\rho$, $\gamma$, $\omega$).
+On opte pour un modèle à **pentes aléatoires sur les effets fixes** = une pente intra-massif, moyenne sur tous les massifs ($\alpha$, $\beta$, $\gamma$, $\delta$) + une variation inter-massif ($\theta$, $\rho$, $\gamma$, $\omega$). Cela correspond aux interactions dans un LM ou un GLM.
 
 \[ log(\lambda_i) = \alpha_j + \beta_j \times Hdom_i + \gamma_j ST_i + \sum_{k = 2}^{k}  \delta_{k,j} \times essence_i + \theta_i  \]
 - Effet aléatoire “massif forestier” :
@@ -877,15 +881,15 @@ Trois ouvrages de référence :
 
 <div class="col3">
 
-```{r echo=FALSE, out.width = "200px"}
+```{r echo=FALSE, out.width = "250px"}
 knitr::include_graphics("Barnagaud_2025_cover.png")
 ```
 
-```{r echo=FALSE, out.width = "200px"}
+```{r echo=FALSE, out.width = "250px"}
 knitr::include_graphics("Numerical_Ecology_R_cover.png")
 ```
 
-```{r echo=FALSE, out.width = "200px"}
+```{r echo=FALSE, out.width = "250px"}
 knitr::include_graphics("zuur_2009.png")
 ```
 
