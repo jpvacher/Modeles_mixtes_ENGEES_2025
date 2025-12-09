@@ -79,3 +79,4 @@ N'hésitez pas durant votre à consigner des notes à part pour la discussion, p
 (Optionel) Vous pouvez construire un logigramme (flowchart) pour structurer votre démarche analytique et les différentes étapes qui permettent d'arriver aux résultats.
 
 On pourra voir ensemble les solutions pour mettre en place des penses-bêtes pour les résultats et la discussion.
+
