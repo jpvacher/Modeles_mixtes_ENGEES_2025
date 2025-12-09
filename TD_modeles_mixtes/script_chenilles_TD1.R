@@ -26,7 +26,7 @@ library(MuMIn) #pour fonction r.squaredGLMM
 
 # CHARGER LES DONNEES ####
 #getwd() #permet de voir dans quel directory on se trouve
-setwd("TD_modeles_mixtes") #à taper si on n'est pas dans le bon directory
+#setwd("TD_modeles_mixtes") #à taper si on n'est pas dans le bon directory
 chenilles <- read.csv2("chenille_processionnaire.csv",row.names=1, encoding="UTF-8")
 chenilles$prop_attaq <- chenilles$nbpinsattac / chenilles$nbpins
 
