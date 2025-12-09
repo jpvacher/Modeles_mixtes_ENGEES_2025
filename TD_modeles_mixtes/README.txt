@@ -21,7 +21,7 @@ Cheynel et al. 2025. Does nocturnal light pollution impair immune function in a 
 
 https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.70212
 
-On télécharge les données sur le site (open access)
+On télécharge les données en suivant les recommandations sur le site (open access)
 On regarde comment elles se présentent, et on regarde le M&M de l'article. Que peut-on en dire ? Avez-vous des observations/remarques/critiques par rapport à ce que l'on a vu en cours ?
 
 Avec ce jeu de données, on va tenter de retrouver les résultats de l'article (Figures 2 et 3).
@@ -49,11 +49,11 @@ Les données et scripts proviennent des supplementary data de l'article.
 
 Intérêt de ce jeu de données : on sort un peu du contexte habituel en écologie, avec des données complexes et une hiérarchisation simple mais inhabituelle + on utilise un autre package que lme4, donc des codes un peu différents.
 
-Les buts de cet exercice sont :
+Les buts de ces exercices sont :
 1. Explorer ensemble le jeu de données et comprendre le sens des variables au regard de la question scientifique posée.
 
 2. Ajuster dans R un modèle linéaire mixte avec des données écologiques complexes à l'aide d'un package différent de celui vu en cours.
 
-3. On va interpréter ensemble les sorties des modèles et voir comment ils sont valorisés (quelles sorties graphiques ?) et discutés dans l'article.
+3. On va interpréter ensemble les sorties des modèles et voir comment ils sont valorisés (quelles sorties graphiques ?) et discutés dans les articles.
 
 Durant le TD, nous déroulerons ensemble les scripts afin de bien comprendre les différentes étapes, explorer les données, ajuster les modèles, les interpréter et les évaluer, et voir s'il y aurait des choses à modifier ou à mieux expliquer dans les annotations.
