@@ -1,6 +1,6 @@
 ---
 title: "Introduction aux modèles mixtes (LMM et GLMM)"
-author: "Jean-Pierre Vacher"
+author: "Jean-Pierre Vacher. jpvacher@gmail.com"
 date: 'last updated: `r Sys.Date()`'
 output:
   slidy_presentation: default
